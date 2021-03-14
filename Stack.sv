@@ -12,7 +12,7 @@ module Stack (
 	logic [2:0]  current 		  = 3'h0;
 	logic 		 stkClk;
 	logic 		 stkOv;
-	logic        read;
+	logic [2:0]  read;
 	int 			 i;
 	
 	always_ff @(posedge stkClk or posedge rst)
@@ -36,7 +36,7 @@ module Stack (
 	
 	always_comb begin
 	   stkClk = clk  & cen;
-		read   = current - 1'b1;
+		{stkOv, read}   = current - 1'b1;
 	end
 
 endmodule 

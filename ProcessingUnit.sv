@@ -126,14 +126,14 @@ module ProcessingUnit (
 			port_addr_o <= 8'h00;
 		end
 		else if (port_we_c) begin
-			port_data_o <= rs2_e;
+			port_data_o <= rsr2_e;
 			port_addr_o <= ALU_i;
 		end
 	end
 	
 	always_comb begin
 		addr_i = ALU_i;
-		dat_i  = rs2_e;
+		dat_i  = rsr2_e;
 	end
 			
 	ALU alu (
