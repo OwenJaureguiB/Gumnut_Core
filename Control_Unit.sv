@@ -2,7 +2,7 @@ module Control_Unit (
 	input  logic [6:0] op_i,
 	input  logic [2:0] func_i,
 	input  logic   	 inst_ack_i,
-	input  logic		 int_i,
+	input  logic		 int_req,
 	input  logic       data_ack_i,
 	input  logic       port_ack_i,
 	input  logic       clk,
@@ -21,6 +21,7 @@ module Control_Unit (
 	output logic       int_o,
 	output logic 		 stb_o,
 	output logic 		 cyc_o,
+	output logic       port_we_o,
 	output logic 		 data_we_o,
 	output logic 		 data_stb_o,
 	output logic 		 data_cyc_o,
@@ -89,9 +90,9 @@ module Control_Unit (
 					nxt_state = decode_state;
 			end
 			decode_state: begin
-				if((int_i & intEn) & (branch | jump | misc))
+				if((int_req & intEn) & (branch | jump | misc))
 					nxt_state = int_state;
-				else if(misc & (wait_ | stby) & ~(int_i & intEn))
+				else if(misc & (wait_ | stby) & ~(int_req & intEn))
 					nxt_state = decode_state;
 				else if (alu_immed | alu_reg | shift | mem)
 					nxt_state = execute_state;
@@ -100,9 +101,9 @@ module Control_Unit (
 			end
 			int_state: nxt_state = fetch_state;
 			execute_state: begin
-				if ((int_i & intEn) & mem & ((stm & data_ack_i) | (out & port_ack_i)))
+				if ((int_req & intEn) & mem & ((stm & data_ack_i) | (out & port_ack_i)))
 					nxt_state = int_state;
-				else if (~(int_i & intEn) & mem & ((stm & data_ack_i) | (out & port_ack_i)))
+				else if (~(int_req & intEn) & mem & ((stm & data_ack_i) | (out & port_ack_i)))
 					nxt_state = fetch_state;
 				else if ((mem & ((ldm & data_ack_i)|(inp & port_ack_i))) | ~mem)
 					nxt_state = write_back_state;
@@ -110,15 +111,15 @@ module Control_Unit (
 					nxt_state = mem_state;
 			end
 			write_back_state: begin
-				if (int_i & intEn)
+				if (int_req & intEn)
 					nxt_state = int_state;
 				else 
 					nxt_state = fetch_state;
 			end
 			mem_state: begin
-				if (((stm & data_ack_i) | (out & port_ack_i)) & (int_i & intEn))
+				if (((stm & data_ack_i) | (out & port_ack_i)) & (int_req & intEn))
 					nxt_state = int_state;
-				else if (((stm & data_ack_i) | (out & port_ack_i)) & ~(int_i & intEn))
+				else if (((stm & data_ack_i) | (out & port_ack_i)) & ~(int_req & intEn))
 					nxt_state = fetch_state;
 				else if ((ldm & data_ack_i) | (inp & port_ack_i))
 					nxt_state = write_back_state;
@@ -151,6 +152,7 @@ module Control_Unit (
 				intEn_     = 1'bz;
 				intReg     = 1'b0;
 				StmMux_o   = 1'bz;
+				port_we_o  = 1'b0;
 			end
 			decode_state: begin
 				int_ack	  = 1'b0;
@@ -167,6 +169,7 @@ module Control_Unit (
 				data_stb_o = 1'b0;
 				data_cyc_o = 1'b0;
 				StmMux_o   = 1'bz;
+				port_we_o  = 1'b0;
 				if (~(branch | jump | (misc & ~func_i[1]))) begin
 					PCoper_o = 4'h0;
 					PCEn_o   = 1'b1;
@@ -244,6 +247,7 @@ module Control_Unit (
 				data_stb_o = 1'b0;
 				data_cyc_o = 1'b0;
 				StmMux_o   = 1'bz;
+				port_we_o  = 1'b0;
 			end
 			execute_state: begin
 				int_ack    = 1'b0;
@@ -266,9 +270,10 @@ module Control_Unit (
 				int_o		  = 1'b0;
 				stb_o		  = 1'b0;
 				cyc_o		  = 1'b0;
-				data_we_o  = mem & (stm | out);
-				data_stb_o = mem;
-				data_cyc_o = mem;
+				port_we_o  = mem & out;
+				data_we_o  = mem & stm;
+				data_stb_o = mem & (ldm | stm);
+				data_cyc_o = mem & (ldm | stm);
 				intEn_     = 1'bz;
 				intReg     = 1'b0;
 				StmMux_o   = mem & (stm | out);
@@ -295,8 +300,9 @@ module Control_Unit (
 				stb_o		  = 1'b0;
 				cyc_o		  = 1'b0;
 				data_we_o  = 1'b0;
-				data_stb_o = mem;
-				data_cyc_o = mem;
+				port_we_o  = 1'b0;
+				data_stb_o = mem & (ldm | stm);
+				data_cyc_o = mem & (ldm | stm);
 				intEn_     = 1'bz;
 				intReg     = 1'b0;
 				StmMux_o   = 1'b0;
@@ -317,9 +323,10 @@ module Control_Unit (
 				int_o		  = 1'b0;
 				stb_o		  = 1'b0;
 				cyc_o		  = 1'b0;
-				data_we_o  = stm | out;
-				data_stb_o = 1'b1;
-				data_cyc_o = 1'b1;
+				port_we_o  = out;
+				data_we_o  = stm;
+				data_stb_o = ldm | stm;
+				data_cyc_o = ldm | stm;
 				intEn_     = 1'bz;
 				intReg     = 1'b0;
 				StmMux_o   = stm | out;
@@ -345,6 +352,7 @@ module Control_Unit (
 				data_cyc_o = 1'bx;
 				intEn_     = 1'bx;
 				intReg     = 1'bx;
+				port_we_o  = 1'bx;
 			end
 		endcase
 	end
