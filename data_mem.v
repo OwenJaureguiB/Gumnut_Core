@@ -11,7 +11,7 @@ module data_mem ( input  clk_i,
 
   reg read_ack;
 
-  //initial $readmemh("gasm_data.dat", DMem);
+  initial $readmemh("gasm_data.dat", DMem);
 
   always @(posedge clk_i)
     if (cyc_i && stb_i)

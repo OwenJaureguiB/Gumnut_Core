@@ -29,7 +29,7 @@ module ALUA (
 		.res(res),
 		.cout(cout_)
 	);
-
+	
 	assign cout = cout_ ^ ALUOp_i[1];
 
 endmodule 
