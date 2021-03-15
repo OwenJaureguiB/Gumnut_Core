@@ -39,13 +39,13 @@ module IR (
 	end	
 	
 	always_comb begin
-		func_o = (op_o[6]   == 1'b0) 		  ? inst_i[16:14] :
-					(op_o[6:5] == 2'b10)		  ? inst_i[16:15] :
-					(op_o[6:4] == 3'b110) 	  ? inst_i[1:0] 	:
-					(op_o[6:3] == 4'b1110) 	  ? inst_i[2:0]	:
-					(op_o[6:2] == 5'b11110)   ? inst_i[12] 	:
-					(op_o[6:1] == 6'b111110)  ? inst_i[11:10] :
-					(op_o		  == 7'b1111110) ? inst_i[10:8]  : 3'hx;
+		func_o = (op_o[6]   == 1'b0) 		  ? 	 	 inst_i[16:14]  :
+					(op_o[6:5] == 2'b10)		  ? {1'b0,inst_i[15:14]} :
+					(op_o[6:4] == 3'b110) 	  ? {1'b0,inst_i[1:0]} 	 :
+					(op_o[6:3] == 4'b1110) 	  ? 	 	 inst_i[2:0]	 :
+					(op_o[6:2] == 5'b11110)   ? {2'b0,inst_i[12]}	 :
+					(op_o[6:1] == 6'b111110)  ? {1'b0,inst_i[11:10]} :
+					(op_o		  == 7'b1111110) ? 	 	 inst_i[10:8]   : 3'hx;
 	end
 	
 endmodule
