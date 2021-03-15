@@ -29,11 +29,7 @@ module ALUA (
 		.res(res),
 		.cout(cout_)
 	);
-<<<<<<< HEAD
-	
-=======
 
->>>>>>> db2d6a1a636cb5bafb0f538c0822cdc9a140e475
 	assign cout = cout_ ^ ALUOp_i[1];
 
 endmodule 
