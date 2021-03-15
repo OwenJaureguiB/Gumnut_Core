@@ -11,7 +11,6 @@ module Stack (
 	logic [11:0] stack_reg [7:0];
 	logic [2:0]  current 		  = 3'h0;
 	logic 		 stkClk;
-	logic 		 stkOv;
 	logic [2:0]  read;
 	int 			 i;
 	
@@ -22,13 +21,13 @@ module Stack (
 			current <= 3'h0;
 		end
 		else if (push_i) begin
-			{stkOv, current}	 <= current + 1'b1;
+			current 	 	  		 <= current + 1'b1;
 			stack_reg[current] <= pc_i;
 			pc_o 					 <= pc_i;
 		end
 		else if (pop_i) begin
-			{stkOv, current}   <= read;
-			pc_o 					 <= stack_reg[read];
+			current <= read;
+			pc_o 	  <= stack_reg[read];
 		end
 		else
 			pc_o <= stack_reg[read];
@@ -36,7 +35,7 @@ module Stack (
 	
 	always_comb begin
 	   stkClk = clk  & cen;
-		{stkOv, read}   = current - 1'b1;
+		read   = current - 1'b1;
 	end
 
 endmodule 
