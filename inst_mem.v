@@ -7,7 +7,7 @@ module inst_mem ( input  clk_i,
 
   reg [17:0] IMem [0:4095];
 
-  //initial $readmemh("gasm_text.dat", IMem);
+  initial $readmemh("gasm_text.dat", IMem);
 
   assign dat_o = IMem[adr_i];
 
