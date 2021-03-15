@@ -29,7 +29,6 @@ module IR (
 
 	always_comb begin
 		op_o = inst_i[17:11];
-		func_o = inst_i[17] ? inst_i[2:0] : inst_i[16:14];
 		addr_o = inst_i[11:0];
 		disp_o = inst_i[7:0];
 		rs_o = inst_i[10:8];
@@ -38,5 +37,15 @@ module IR (
 		immed_o = inst_i[7:0];
 		count_o = inst_i[7:5];
 	end	
+	
+	always_comb begin
+		func_o = (op_o[6]   == 1'b0) 		  ? inst_i[16:14] :
+					(op_o[6:5] == 2'b10)		  ? inst_i[16:15] :
+					(op_o[6:4] == 3'b110) 	  ? inst_i[1:0] 	:
+					(op_o[6:3] == 4'b1110) 	  ? inst_i[2:0]	:
+					(op_o[6:2] == 5'b11110)   ? inst_i[12] 	:
+					(op_o[6:1] == 6'b111110)  ? inst_i[11:10] :
+					(op_o		  == 7'b1111110) ? inst_i[10:8]  : 3'hx;
+	end
 	
 endmodule

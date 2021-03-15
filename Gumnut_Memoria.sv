@@ -44,7 +44,7 @@ module Gumnut_Memoria (
       .dat_o(data_dat) 
 	);
 	
-	Gumnut_Core (
+	Gumnut_Core core (
 		.clk_i(clk_i),
 		.ClkEn_e(ClkEn_e),
 		.rst_i(rst_i),
