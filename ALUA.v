@@ -10,6 +10,7 @@ module ALUA (
 	wire [7:0] OPA;
 	wire [7:0] OPB;
 	wire cin;
+	wire cout_;
 
 	ALUEXT ext (
 		.rs_i(rs_i),
@@ -26,8 +27,9 @@ module ALUA (
 		.B(OPB),
 		.cin(cin),
 		.res(res),
-		.cout(cout)
+		.cout(cout_)
 	);
-
+	
+	assign cout = cout_ ^ ALUOp_i[1];
 
 endmodule 
